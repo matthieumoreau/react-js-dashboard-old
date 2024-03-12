@@ -18,6 +18,33 @@ export const authConfig = {
       }
       return true;
     },
+    
+    jwt: async ({ token, user }) => {
+      // user is only available the first time a user signs in authorized
+       if (user) {
+         return {
+           ...token, ...user
+         };
+       }
+       return token;
+     },
+     session: async ({ session, token }) => {
+      // if (Date.now() / 1000 > token?.accessTokenExpires && token?.refreshTokenExpires && Date.now() / 1000 > token?.refreshTokenExpires) {
+      //   return Promise.reject({
+      //     error: new Error("Refresh token has expired. Please log in again to get a new refresh token."),
+      //   });
+      // }
+    
+      const accessTokenData = JSON.parse(atob(token.access_token.split(".")?.at(1)));
+      session.user = accessTokenData;
+      token.accessTokenExpires = accessTokenData.exp;
+      session.accessToken = token?.access_token;
+    
+      session.token = token?.token;
+
+       return session;
+     },
+
   },
   providers: [
     CredentialsProvider({
@@ -35,15 +62,14 @@ export const authConfig = {
           }),
         });
 
-        console.log("authResponse", authResponse)
-
-
         if (!authResponse.ok) {
 
           return null;
         }
 
         const user = await authResponse.json();
+
+        console.log("user", user)
 
         return user;
       },
