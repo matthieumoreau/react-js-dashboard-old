@@ -28,18 +28,10 @@ export const authConfig = {
        }
        return token;
      },
-     session: async ({ session, token }) => {
-      // if (Date.now() / 1000 > token?.accessTokenExpires && token?.refreshTokenExpires && Date.now() / 1000 > token?.refreshTokenExpires) {
-      //   return Promise.reject({
-      //     error: new Error("Refresh token has expired. Please log in again to get a new refresh token."),
-      //   });
-      // }
-    
+     session: async ({ session, token }) => {    
       const accessTokenData = JSON.parse(atob(token.access_token.split(".")?.at(1)));
-      session.user = accessTokenData;
       token.accessTokenExpires = accessTokenData.exp;
       session.accessToken = token?.access_token;
-    
       session.token = token?.token;
 
        return session;
